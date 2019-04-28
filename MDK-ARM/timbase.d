@@ -1,0 +1,12 @@
+.\timbase.o: ..\USER\TiMbase.c
+.\timbase.o: ..\USER\TiMbase.h
+.\timbase.o: ..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\stm32f10x.h
+.\timbase.o: ..\Libraries\CMSIS\CM3\CoreSupport\core_cm3.h
+.\timbase.o: I:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\timbase.o: ..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\system_stm32f10x.h
+.\timbase.o: ..\USER\stm32f10x_conf.h
+.\timbase.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_gpio.h
+.\timbase.o: ..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\stm32f10x.h
+.\timbase.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_rcc.h
+.\timbase.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
+.\timbase.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_tim.h

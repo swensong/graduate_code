@@ -1,0 +1,15 @@
+.\oled.o: ..\USER\oled.c
+.\oled.o: ..\USER\oled.h
+.\oled.o: ..\USER\sys.h
+.\oled.o: ..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\stm32f10x.h
+.\oled.o: ..\Libraries\CMSIS\CM3\CoreSupport\core_cm3.h
+.\oled.o: I:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\oled.o: ..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\system_stm32f10x.h
+.\oled.o: ..\USER\stm32f10x_conf.h
+.\oled.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_gpio.h
+.\oled.o: ..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\stm32f10x.h
+.\oled.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_rcc.h
+.\oled.o: ..\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
+.\oled.o: I:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\oled.o: ..\USER\oledfont.h
+.\oled.o: ..\USER\delay.h
