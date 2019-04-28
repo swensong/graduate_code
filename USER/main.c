@@ -65,44 +65,12 @@ void ftoa(float n, char *res, int afterpoint);
 void dtoa(double n, char *res, int afterpoint);
 
 
-//extern int  OverFlow;
-void LCD_backspace();
-
-int  LCD_BackLight = 1;
-
-
-
-volatile u32 time = 0; // ms ???? 
-
-
-
-
-volatile int  PD2Interrupt=0;
-
- volatile int  Stop=0;
- 
- volatile int  PB3Interrupt=0;
-
-
-
 int main(void)
 {
-	int num = 0;
-
-	int key;
-
-	int x, y;
-	int i;
-
-	char  ascii;
 
 
 	RCC_ClocksTypeDef rcc_clocks;
 
-
-
-
-	//SetClock();
 
 
 
@@ -120,118 +88,18 @@ int main(void)
 	Dgprintf("\r\nPCLK1_Frequency = %d MHz\n", rcc_clocks.PCLK1_Frequency / 1000000);
 	Dgprintf("\r\nPCLK2_Frequency = %d MHz\n", rcc_clocks.PCLK2_Frequency / 1000000);
 
-
-
-	PD20_Interrupt_Config();
-
-
-
-
-
 	delay_init();
+	Dgprintf("delay_init success!\r\n");
 
-	LCD_BackLight = 1;
-	Delay(0xfffff);
-	PBout(6) = 0; //cs	
-	Lcd_Init();
-
-
-	SetColor(WHITE, BLACK);
-	LCD_Clear(0xffffff);
-	LCD_ShowString(1, 1, "abcedfcds123terererterterterterterertererter");
-
-	showhanzi(10, 20, 3);
-
-
-	/* TIM2 ???? */
-	TIM2_Configuration();
-
-	/* ??????????? */
-	TIM2_NVIC_Configuration();
-	for(i=0;i<5;i++)
-		delay_ms(1000);
-
-
-	//if(!PDin(2)){
-		motor_start();
-		/* TIM2 ?????,???? */
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);	
-	//}
+	OLED_Init();
 	
+	OLED_Display_String(0,0,"Init success!");
+	Dgprintf("OLED_Init success!\r\n");
 	
-
-		//Delay(0xfffff);
- 
-
 			
 	while (1)
 	{
-		/*
-
-		Delay(0xfffff);
-		PBout(12)=0;Address_set(0,0,LCD_W-1,LCD_H-1);
-		Delay(0xfffff);
-		PBout(13)=1;
-		Delay(0xfffff);
-		PBout(13)=0;
-		Delay(0xfffff);
-
-
-		PAout(3)=1;
-		Delay(0xfffff);
-		PAout(3)=0;
-		Delay(0xfffff);
-
-		*/
-		//LCD_ShowString(1,1,"abc");
-		//	Delay(0xfffff);		
-		// Dgprintf("\r\nHello Word  %d \r\n",num);
-
-		// num++;
-
-
-		if (time == 1000) /* 1000 * 1 ms = 1s ??? */
-		{
-			time = 0;
-			/* LED1 ?? */
-			//LED1_TOGGLE; 
-			
-			
-			
-			
-
-
-			Dgprintf(".");
-		}
-
-		
-		if(PD2Interrupt){
-			
-			Dgprintf(" xx ");
-			
-			PD2Interrupt=0;
-			
-			Stop=1;
-		}
-
-		
-		if(PB3Interrupt){
-			
-			Dgprintf(" PB3 ");
-			
-			PB3Interrupt=0;
-			
-			Stop=1;
-		}
-
-
 	}
-
-
-
-
-
-
 
 }
 

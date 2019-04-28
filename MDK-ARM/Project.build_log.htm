@@ -21,19 +21,12 @@ Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V3.0.1.0
 Dialog DLL:      TCM.DLL V1.35.1.0
  
 <h2>Project:</h2>
-H:\teach\MultiFuncBoard20190409\MDK-ARM\Project.uvprojx
-Project File Date:  04/11/2019
+H:\teach\graduate\graduate_software\MDK-ARM\Project.uvprojx
+Project File Date:  04/28/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'I:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'com'
-compiling stm32f10x_it.c...
-..\USER\motor.h(38): warning:  #1295-D: Deprecated declaration motor_start - give arg types
-  void  motor_start();
-..\USER\motor.h(39): warning:  #1295-D: Deprecated declaration moto_stop - give arg types
-  void  moto_stop();
-..\USER\stm32f10x_it.c: 2 warnings, 0 errors
-compiling oled.c...
 compiling main.c...
 ..\USER\Clock.h(9): warning:  #1295-D: Deprecated declaration SetClock - give arg types
    void SetClock();
@@ -45,84 +38,34 @@ compiling main.c...
   void USART1_Config();
 ..\USER\main.c(55): warning:  #1295-D: Deprecated declaration calculate - give arg types
   double calculate();
-..\USER\main.c(69): warning:  #1295-D: Deprecated declaration LCD_backspace - give arg types
-  void LCD_backspace();
-..\USER\main.c(90): warning:  #177-D: variable "num"  was declared but never referenced
-  	int num = 0;
-..\USER\main.c(92): warning:  #177-D: variable "key"  was declared but never referenced
-  	int key;
-..\USER\main.c(94): warning:  #177-D: variable "x"  was declared but never referenced
-  	int x, y;
-..\USER\main.c(94): warning:  #177-D: variable "y"  was declared but never referenced
-  	int x, y;
-..\USER\main.c(97): warning:  #177-D: variable "ascii"  was declared but never referenced
-  	char  ascii;
-..\USER\main.c(517): warning:  #223-D: function "strlen" declared implicitly
+..\USER\main.c(385): warning:  #223-D: function "strlen" declared implicitly
   	for (j = 0; j < strlen(str); j++) {
-..\USER\main.c(533): warning:  #223-D: function "memcpy" declared implicitly
+..\USER\main.c(401): warning:  #223-D: function "memcpy" declared implicitly
   				memcpy(LCDBuff + i * 24, LCDBuff + i * 24 + 24, 24);
-..\USER\main.c(535): warning:  #223-D: function "memset" declared implicitly
+..\USER\main.c(403): warning:  #223-D: function "memset" declared implicitly
   			memset(LCDBuff + 3 * 24, 0, 24);
-..\USER\main.c(544): warning:  #177-D: variable "a"  was declared but never referenced
+..\USER\main.c(412): warning:  #177-D: variable "a"  was declared but never referenced
   						uchar  a = LCDBuff[xx + yy / 2 * 24];
-..\USER\main.c(928): warning:  #1256-D: "const char" would have been promoted to "int" when passed through the ellipsis parameter; use the latter type instead
+..\USER\main.c(796): warning:  #1256-D: "const char" would have been promoted to "int" when passed through the ellipsis parameter; use the latter type instead
   				c = va_arg(ap, const char);
-..\USER\main.c: 16 warnings, 0 errors
-compiling Clock.c...
-..\USER\Clock.h(9): warning:  #1295-D: Deprecated declaration SetClock - give arg types
-   void SetClock();
-..\USER\Clock.c: 1 warning, 0 errors
-compiling delay.c...
-compiling motor.c...
-..\USER\motor.h(38): warning:  #1295-D: Deprecated declaration motor_start - give arg types
-  void  motor_start();
-..\USER\motor.h(39): warning:  #1295-D: Deprecated declaration moto_stop - give arg types
-  void  moto_stop();
-..\USER\motor.c: 2 warnings, 0 errors
-compiling TiMbase.c...
-compiling Interrupt.c...
-..\USER\Interrupt.c(41): warning:  #177-D: variable "GPIO_InitStructure"  was declared but never referenced
-    GPIO_InitTypeDef GPIO_InitStructure; 
-..\USER\Interrupt.c(149): warning:  #1-D: last line of file ends without a newline
-  }
-..\USER\Interrupt.c: 2 warnings, 0 errors
-compiling misc.c...
-compiling stm32f10x_gpio.c...
-compiling stm32f10x_flash.c...
-compiling stm32f10x_rcc.c...
-compiling stm32f10x_bkp.c...
-compiling stm32f10x_adc.c...
-compiling stm32f10x_can.c...
-compiling stm32f10x_crc.c...
-compiling stm32f10x_cec.c...
-compiling stm32f10x_dac.c...
-compiling stm32f10x_dbgmcu.c...
-compiling stm32f10x_dma.c...
-compiling stm32f10x_exti.c...
-compiling stm32f10x_i2c.c...
-compiling stm32f10x_fsmc.c...
-compiling stm32f10x_iwdg.c...
-compiling stm32f10x_pwr.c...
-compiling stm32f10x_rtc.c...
-compiling stm32f10x_sdio.c...
-compiling stm32f10x_spi.c...
-compiling stm32f10x_usart.c...
-compiling stm32f10x_tim.c...
-compiling stm32f10x_wwdg.c...
-assembling startup_stm32f10x_hd.s...
-compiling core_cm3.c...
-compiling system_stm32f10x.c...
+..\USER\main.c: 10 warnings, 0 errors
 linking...
-Program Size: Code=5580 RO-data=1856 RW-data=1192 ZI-data=1024  
-".\Project.axf" - 0 Error(s), 23 Warning(s).
+Program Size: Code=3788 RO-data=2340 RW-data=44 ZI-data=1044  
+".\Project.axf" - 0 Error(s), 10 Warning(s).
 
 <h2>Software Packages used:</h2>
 
+Package Vendor: Keil
+                http://www.keil.com/pack/Keil.STM32F1xx_DFP.2.2.0.pack
+                Keil.STM32F1xx_DFP.2.2.0
+                STMicroelectronics STM32F1 Series Device Support, Drivers and Examples
+
 <h2>Collection of Component include folders:</h2>
   .\RTE\_com
+  I:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:11
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

@@ -169,7 +169,6 @@ void SysTick_Handler(void)
   * @retval None
   */
 	
-	extern volatile u32 time;
 	#include "stm32f10x_tim.h"
 	
 	#include "stm32f10x.h"
@@ -178,125 +177,9 @@ void SysTick_Handler(void)
 #include"stdarg.h"
 	
 	
-#include "motor.h"
-	
-int  flag=0;
-
-	 extern int  Stop;
- 
-void TIM2_IRQHandler(void)
-{
-	if ( TIM_GetITStatus(TIM2 , TIM_IT_Update) != RESET ) 
-	{	
-		time++;
-		
-		if(!Stop){
-		if(flag){
-			MOTOR0_PULSE_1;
-			flag=0;
-		}else{
-		
-			MOTOR0_PULSE_0;
-			flag=1;
-		}
-		
-	}
-		
-		
-		
-		TIM_ClearITPendingBit(TIM2 , TIM_FLAG_Update);  		 
-	}		 	
-}
 
 
-#include "stm32f10x.h"
 
-#include "stm32f10x_exti.h"
-#include "sys.h"
-
-
-extern int PD2Interrupt;
-
-extern int PB3Interrupt;
-
-
-int  PB3=-1;
-int  PB4=-1;
-int  PB5=-1;
-
-void EXTI2_IRQHandler(void)
-{
-	if(EXTI_GetITStatus(EXTI_Line2) != RESET) //???????EXTI Line??
-	{
- 
-		
-		
- 		
-		
-		
-		if(PDin(2)){
-			PD2Interrupt=1;			
-		}
-			
-		if(PB3<0)
-			PB3=PBin(3);
-		
-		
-		
-		if(PB3!=PBin(3)){
-			
-			PB3Interrupt=1;
-		}
-		
-		
-		PB3=PBin(3);
-			
-		
-		
-		
-		
-		
-		EXTI_ClearITPendingBit(EXTI_Line2);     //???????
-	}  
-}
-
-void EXTI15_10_IRQHandler(void)
-{
-		if(EXTI_GetITStatus(EXTI_Line13) != RESET)
-		{
-			EXTI_ClearITPendingBit(EXTI_Line13);
-		}
-		
-		if(EXTI_GetITStatus(EXTI_Line14) != RESET)
-		{
-			EXTI_ClearITPendingBit(EXTI_Line14);
-		}
-		
-		if(EXTI_GetITStatus(EXTI_Line15) != RESET)
-		{
-			EXTI_ClearITPendingBit(EXTI_Line15);
-		}
-}
-
-int PC1 = 0;
-
-void EXTI0_IRQHandler(void)
-{
-	if(EXTI_GetITStatus(EXTI_Line0) != RESET) //???????EXTI Line??
-	{
-		PC1=PCin(1);
-		
-		if (PC1)
-		{
-		}
-		else
-		{
-		}
-		
-		
-		EXTI_ClearITPendingBit(EXTI_Line0);     //???????
-	}  
-}
 
 
 

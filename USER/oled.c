@@ -1,473 +1,293 @@
-
-
 #include "oled.h"
-#include "stdlib.h"
-#include "oledfont.h"  	 
+#include "spi.h"
+#include "oledfont.h"
 #include "delay.h"
 
-u16 BACK_COLOR, POINT_COLOR;   //背景色，画笔色
-void LCD_Writ_Bus(char dat)   //串行数据写入
-{	
-	u8 i;			  
-  
+/* 硬件部分 */
+void SPI_OLED_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
 
-	for(i=0;i<8;i++)
-	{			  
-		OLED_SCLK_Clr();
-		if(dat&0x80)
-		   OLED_SDIN_Set();
-		else 
-		   OLED_SDIN_Clr();
-		OLED_SCLK_Set();
-		dat<<=1;   
-	}			
-}
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_OLED_PORT, ENABLE );
 
-void LCD_WR_DATA8(char da) //发送数据-8位参数
-{	//OLED_CS_Clr();
-    OLED_DC_Set();
-	LCD_Writ_Bus(da);  
-	//OLED_CS_Set();
+    //片选信号初始化
+    GPIO_InitStructure.GPIO_Pin = OLED_CS_PIN|OLED_DC_PIN|OLED_RST_PIN;  
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;  //复用推挽输出
+    GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
+    GPIO_Init(OLED_PORT, &GPIO_InitStructure);
+    GPIO_SetBits(OLED_PORT,OLED_CS_PIN|OLED_DC_PIN|OLED_RST_PIN);
+
+    SPI1_Init();           //初始化SPI
+    SPI1_SetSpeed(SPI_BaudRatePrescaler_16);    //设置为18M时钟,高速模式
 }  
- void LCD_WR_DATA(int da)
-{//	OLED_CS_Clr();
-    OLED_DC_Set();
-	LCD_Writ_Bus(da>>8);
-    LCD_Writ_Bus(da);
-//	OLED_CS_Set();
-}	  
-void LCD_WR_REG(char da)	 
-{	//	OLED_CS_Clr();
-    OLED_DC_Clr();
-	LCD_Writ_Bus(da);
-//	OLED_CS_Set();
-}
- void LCD_WR_REG_DATA(int reg,int da)
-{//	OLED_CS_Clr();
-    LCD_WR_REG(reg);
-	LCD_WR_DATA(da);
-//	OLED_CS_Set();
-}
 
-void Address_set(unsigned int x1,unsigned int y1,unsigned int x2,unsigned int y2)
-{ 
-	LCD_WR_REG(0x2a);
-   LCD_WR_DATA8(x1>>8);
-   LCD_WR_DATA8(x1);
-   LCD_WR_DATA8(x2>>8);
-   LCD_WR_DATA8(x2);
-  
-   LCD_WR_REG(0x2b);
-   LCD_WR_DATA8(y1>>8);
-   LCD_WR_DATA8(y1);
-   LCD_WR_DATA8(y2>>8);
-   LCD_WR_DATA8(y2);
-
-   LCD_WR_REG(0x2C);					 						 
-}
-
-void Lcd_Init(void)
+/* 基本函数部分 */
+//硬件SPI发送数据
+void OLED_Write_Byte(uint8_t dat)
 {
-	/*
- 	GPIO_InitTypeDef  GPIO_InitStructure;
- 	
- 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);	 //使能A端口时钟
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;	 
- 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;//速度50MHz
- 	GPIO_Init(GPIOD, &GPIO_InitStructure);	  //初始化GPIOD3,6
- 	GPIO_SetBits(GPIOD,GPIO_Pin_2);	
-	
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	 //使能A端口时钟
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10|GPIO_Pin_11|GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_15;	 
- 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;//速度50MHz
- 	GPIO_Init(GPIOB, &GPIO_InitStructure);	  //初始化GPIOD3,6
- 	GPIO_SetBits(GPIOB,GPIO_Pin_10|GPIO_Pin_11|GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_15);	
-	
-	*/
-
-	//OLED_CS_Clr();  //打开片选使能
-	// OLED_RST_Clr();
-	delay_ms(20);
-	//OLED_RST_Set();
-	delay_ms(20);
-	//OLED_BLK_Set();
-	
-//************* Start Initial Sequence **********// 
-LCD_WR_REG(0xCF);  
-LCD_WR_DATA8(0x00); 
-LCD_WR_DATA8(0xD9); 
-LCD_WR_DATA8(0X30); 
- 
-LCD_WR_REG(0xED);  
-LCD_WR_DATA8(0x64); 
-LCD_WR_DATA8(0x03); 
-LCD_WR_DATA8(0X12); 
-LCD_WR_DATA8(0X81); 
- 
-LCD_WR_REG(0xE8);  
-LCD_WR_DATA8(0x85); 
-LCD_WR_DATA8(0x10); 
-LCD_WR_DATA8(0x78); 
- 
-LCD_WR_REG(0xCB);  
-LCD_WR_DATA8(0x39); 
-LCD_WR_DATA8(0x2C); 
-LCD_WR_DATA8(0x00); 
-LCD_WR_DATA8(0x34); 
-LCD_WR_DATA8(0x02); 
- 
-LCD_WR_REG(0xF7);  
-LCD_WR_DATA8(0x20); 
- 
-LCD_WR_REG(0xEA);  
-LCD_WR_DATA8(0x00); 
-LCD_WR_DATA8(0x00); 
- 
-LCD_WR_REG(0xC0);    //Power control 
-LCD_WR_DATA8(0x21);   //VRH[5:0] 
- 
-LCD_WR_REG(0xC1);    //Power control 
-LCD_WR_DATA8(0x12);   //SAP[2:0];BT[3:0] 
- 
-LCD_WR_REG(0xC5);    //VCM control 
-LCD_WR_DATA8(0x32); 
-LCD_WR_DATA8(0x3C); 
- 
-LCD_WR_REG(0xC7);    //VCM control2 
-LCD_WR_DATA8(0XC1); 
- 
-LCD_WR_REG(0x36);    // Memory Access Control 
-LCD_WR_DATA8(0xa8); 
- 
-LCD_WR_REG(0x3A);   
-LCD_WR_DATA8(0x55); 
-
-LCD_WR_REG(0xB1);   
-LCD_WR_DATA8(0x00);   
-LCD_WR_DATA8(0x18); 
- 
-LCD_WR_REG(0xB6);    // Display Function Control 
-LCD_WR_DATA8(0x0A); 
-LCD_WR_DATA8(0xA2); 
-
- 
- 
-LCD_WR_REG(0xF2);    // 3Gamma Function Disable 
-LCD_WR_DATA8(0x00); 
- 
-LCD_WR_REG(0x26);    //Gamma curve selected 
-LCD_WR_DATA8(0x01); 
- 
-LCD_WR_REG(0xE0);    //Set Gamma 
-LCD_WR_DATA8(0x0F); 
-LCD_WR_DATA8(0x20); 
-LCD_WR_DATA8(0x1E); 
-LCD_WR_DATA8(0x09); 
-LCD_WR_DATA8(0x12); 
-LCD_WR_DATA8(0x0B); 
-LCD_WR_DATA8(0x50); 
-LCD_WR_DATA8(0XBA); 
-LCD_WR_DATA8(0x44); 
-LCD_WR_DATA8(0x09); 
-LCD_WR_DATA8(0x14); 
-LCD_WR_DATA8(0x05); 
-LCD_WR_DATA8(0x23); 
-LCD_WR_DATA8(0x21); 
-LCD_WR_DATA8(0x00); 
- 
-LCD_WR_REG(0XE1);    //Set Gamma 
-LCD_WR_DATA8(0x00); 
-LCD_WR_DATA8(0x19); 
-LCD_WR_DATA8(0x19); 
-LCD_WR_DATA8(0x00); 
-LCD_WR_DATA8(0x12); 
-LCD_WR_DATA8(0x07); 
-LCD_WR_DATA8(0x2D); 
-LCD_WR_DATA8(0x28); 
-LCD_WR_DATA8(0x3F); 
-LCD_WR_DATA8(0x02); 
-LCD_WR_DATA8(0x0A); 
-LCD_WR_DATA8(0x08); 
-LCD_WR_DATA8(0x25); 
-LCD_WR_DATA8(0x2D); 
-LCD_WR_DATA8(0x0F); 
- 
-LCD_WR_REG(0x11);    //Exit Sleep 
-delay_ms(120); 
-LCD_WR_REG(0x29);    //Display on 
- 
-} 
-
-//清屏函数
-//Color:要清屏的填充色
-void LCD_Clear(u16 Color)
-{
-	u16 i,j;  	
-	//Address_set(0,0,LCD_H-1,LCD_W-1);
-	
-	Address_set(0,0,LCD_W-1,LCD_H-1);
-    for(i=0;i<LCD_W;i++)
-	 {
-	  for (j=0;j<LCD_H;j++)
-	   	{
-        	LCD_WR_DATA(Color);	 			 
-	    }
-
-	  }
+    SPI1_ReadWriteByte(dat);
 }
 
-
-
-//在指定位置显示一个汉字(32*33大小)
-//dcolor为内容颜色，gbcolor为背静颜色
-void showhanzi(unsigned int x,unsigned int y,unsigned char index)	
-{  
-	unsigned char i,j;
-	unsigned char *temp=hanzi;    
-    Address_set(x,y,x+31,y+31); //设置区域      
-	temp+=index*128;	
-	for(j=0;j<128;j++)
-	{
-		for(i=0;i<8;i++)
-		{ 		     
-		 	if((*temp&(1<<i))!=0)
-			{
-				LCD_WR_DATA(POINT_COLOR);
-			} 
-			else
-			{
-				LCD_WR_DATA(BACK_COLOR);
-			}   
-		}
-		temp++;
-	 }
+//写入数据
+void OLED_Write_Data(uint8_t dat)
+{
+    OLED_CS_LOW;
+    OLED_DC_HIGH;
+    OLED_Write_Byte(dat);
 }
-//画点
-//POINT_COLOR:此点的颜色
-void LCD_DrawPoint(u16 x,u16 y)
+
+//写入命令
+void OLED_Write_Cmd(uint8_t cmd)
 {
-	Address_set(x,y,x,y);//设置光标位置 
-	LCD_WR_DATA(POINT_COLOR); 	    
-} 	 
-//画一个大点
-//POINT_COLOR:此点的颜色
-void LCD_DrawPoint_big(u16 x,u16 y)
+    OLED_CS_LOW;
+    OLED_DC_LOW;
+    OLED_Write_Byte(cmd);
+}
+
+/* 调用部分 */
+//Function:设置显示坐标
+//Input:x:横坐标;y:纵坐标
+//Output:无
+//Return:无
+//Others:无
+void OLED_Set_Pos(uint8_t x,uint8_t y)
 {
-	LCD_Fill(x-1,y-1,x+1,y+1,POINT_COLOR);
-} 
-//在指定区域内填充指定颜色
-//区域大小:
-//  (xend-xsta)*(yend-ysta)
-void LCD_Fill(u16 xsta,u16 ysta,u16 xend,u16 yend,u16 color)
-{          
-	u16 i,j; 
-	Address_set(xsta,ysta,xend,yend);      //设置光标位置 
-	for(i=ysta;i<=yend;i++)
-	{													   	 	
-		for(j=xsta;j<=xend;j++)LCD_WR_DATA(color);//设置光标位置 	    
-	} 					  	    
+    OLED_Write_Cmd(0xb0+y);//列偏移
+    OLED_Write_Cmd(((x&0xf0)>>4)|0x10);//行高四位地址
+    OLED_Write_Cmd((x&0x0f)|0X01);//行低四位地址
+}
+
+//Function:开启OLED显示
+//Input:无
+//Output:无
+//Return:无
+//Others:无
+void OLED_Display_On(void)
+{
+    OLED_Write_Cmd(0X8D);//设置DCDC
+    OLED_Write_Cmd(0X14);//打开DCDC
+    OLED_Write_Cmd(0XAF);//打开OLED
+}
+
+//Function:关闭OLED显示
+//Input:无
+//Output:无
+//Return:无
+//Others:无
+void OLED_Display_Off(void)
+{
+    OLED_Write_Cmd(0X8D);//设置DCDC
+    OLED_Write_Cmd(0X10);//关闭DCDC
+    OLED_Write_Cmd(0XAE);//关闭OLED
+}
+
+//Function:清屏
+//Input:无
+//Output:无
+//Return:无
+//Others:无
+void OLED_Display_Clear(void)
+{
+    u8 page,len;
+
+    for(page=0;page<8;page++)
+    {
+        OLED_Write_Cmd(0xB0+page);//设置页地址(0--7)
+        OLED_Write_Cmd(0X00);//设置显示位置—列低地址
+        OLED_Write_Cmd(0X10); //设置显示位置—列高地址
+
+        for(len=0;len<128;len++)
+            OLED_Write_Data(0);//写入0;屏熄灭
+    }
+}
+//Function:在指定位置显示一个字符,包括部分字符
+    //x:0~127;y:0~63;size:选择字体 16/12 
+//Input:x：横坐标;y:纵坐标;str:显示的字符
+//Output:无
+//Return:无
+//Others:无               
+void OLED_Display_Onechar(u8 x,u8 y,u8 str)
+{
+    u8 i=0,ret=0;
+    //ret = str -32;
+    ret = str - ' ';//得到偏移后的值,对ASCLL码进行一个减法.即在二维数组里找它的位置  
+    if(x>Max_Column-1)
+    {
+        x = 0;
+        y = y + 2;//针对16号的字符
+    }
+    if(SIZE == 16 )
+    {
+        OLED_Set_Pos(x,y);
+        //16的字体分成两部分写入
+        for(i=0;i<8;i++)
+        OLED_Write_Data(F8X16[ret*16+i]);
+        OLED_Set_Pos(x,y+1);
+        for(i=0;i<8;i++)
+            OLED_Write_Data(F8X16[ret*16+i+8]);
+    }
+    else{
+        OLED_Set_Pos(x,y+1);
+        for(i=0;i<6;i++)
+            OLED_Write_Data(F6x8[ret][i]);
+    }
+}
+
+//Function:显示字符串
+//Input:x：横坐标;y:纵坐标;str:显示的字符串
+//Output:无
+//Return:无
+//Others:无
+void OLED_Display_String(u8 x,u8 y,u8 *str)
+{
+    u8 i=0;
+
+    while(str[i]!='\0')
+    {
+        OLED_Display_Onechar(x,y,str[i]);
+        x += 8;
+        if(x>120)
+        {
+            x = 0;
+            y += 2;
+        }
+        i++;
+    }
+}
+
+//Function:显示中文
+//Input:x：横坐标;y:纵坐标;no:显示的字的序号
+//Output:无
+//Return:无
+//Others:无
+void OLED_Display_Chinese(u8 x,u8 y,u8 no)
+{
+    u8 ch,addr=0;
+
+    OLED_Set_Pos(x,y);
+    for(ch=0;ch<16;ch++)//数组行列寻址
+    {
+        OLED_Write_Data(Hzk[2*no][ch]);//汉字是2个字节
+        addr += 1;
+    }
+    OLED_Set_Pos(x,y+1);
+    for(ch=0;ch<16;ch++)
+    {
+        OLED_Write_Data(Hzk[2*no+1][ch]);
+        addr += 1;
+    }
+
+}
+
+//Function:显示图片
+//Input:x0,x1：横坐标;y0,y1:纵坐标;BMP:显示的图片
+//注意：y1<8,页寻址模式
+//Output:无
+//Return:无
+//Others:无
+void OLED_Display_Picture(u8 x0,u8 y0,u8 x1,u8 y1,u8 BMP[])
+{
+    u8 x,y;
+    u32 i=0;
+
+    if(y1%8==0)
+        y = y1 / 8;
+    else
+        y = y1 /8 + 1;
+    for(y=y0;y<y1;y++)
+    {
+        OLED_Set_Pos(x0,y);
+        for(x=x0;x<x1;x++)
+        {
+            OLED_Write_Data(BMP[i++]);
+        }
+    }
+}
+
+//计算m的n次方
+u32 OLED_Pow(u8 m,u8 n)
+{
+    u32 ret = 1;
+    while(n--)
+        ret *= m;
+    return ret;
+}
+
+//Function:显示数字
+//Input:x：横坐标;1:纵坐标;num:显示的数字：len：数字长度;size_num:数字字体
+//Output:无
+//Return:无
+//Others:无
+void OLED_Display_Num(u8 x,u8 y,u32 num,u8 len,u8 size_num)
+{
+    u8 t,temp;
+    u8 enshow = 0;
+
+    for(t=0;t<len;t++)
+    {
+        temp = (num/OLED_Pow(10,len-t-1))%10;//把显示的数字一位一位取出来
+        if(enshow==0&&t<(len-1))
+        {
+            if(temp==0)
+            {
+                OLED_Display_Onechar(x+(size_num/2)*t,y,' ');
+                continue;
+            }
+            else
+                enshow = 1;
+        }
+        OLED_Display_Onechar(x+(size_num/2)*t,y,temp+'0');
+    }
+}
+
+//初始化SSD1306
+//命令设置与开启函数作用重叠......
+void OLED_Init(void)
+{
+    SPI_OLED_Init();
+
+    OLED_RST_HIGH;
+    delay_ms(200);
+    OLED_RST_LOW;
+    delay_ms(200);
+    OLED_RST_HIGH; 
+
+    OLED_Write_Cmd(0xAE);//关闭OLED
+    OLED_Write_Cmd(0x00);//设置列低位地址
+    OLED_Write_Cmd(0x10);//设置列高位地址
+    OLED_Write_Cmd(0x40);//设置起始行地址及映射RAM显示起始行 (0x00~0x3F)
+    OLED_Write_Cmd(0x81);//对比度设置
+    OLED_Write_Cmd(0xCF); // Set SEG Output Current Brightness
+    OLED_Write_Cmd(0xA1);//--Set SEG/Column Mapping     0xa0左右反置 0xa1正常
+    OLED_Write_Cmd(0xC8);//Set COM/Row Scan Direction   0xc0上下反置 0xc8正常
+    OLED_Write_Cmd(0xA6);//设置显示方式;bit0:1,反相显示;0,正常显示
+    OLED_Write_Cmd(0xA8);//设置驱动路数(1 to 64)
+    OLED_Write_Cmd(0x3f);//--1/64 duty
+    OLED_Write_Cmd(0xD3);//-设置显示偏移(0x00~0x3F)
+    OLED_Write_Cmd(0x00);//-not offset
+    OLED_Write_Cmd(0xd5);//--set display clock divide ratio/oscillator frequency
+    OLED_Write_Cmd(0x80);//--set divide ratio, Set Clock as 100 Frames/Sec
+    OLED_Write_Cmd(0xD9);//--set pre-charge period
+    OLED_Write_Cmd(0xF1);//Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
+    OLED_Write_Cmd(0xDA);//--set com pins hardware configuration
+    OLED_Write_Cmd(0x12);
+    OLED_Write_Cmd(0xDB);//--set vcomh
+    OLED_Write_Cmd(0x40);//Set VCOM Deselect Level
+    OLED_Write_Cmd(0x20);//设置页地址模式(0x00/0x01/0x02)
+    OLED_Write_Cmd(0x02);//
+    OLED_Write_Cmd(0x8D);//--set Charge Pump enable/disable
+    OLED_Write_Cmd(0x14);//--set(0x10) disable
+    OLED_Write_Cmd(0xA4);//禁用显示开启;bit0:1,开启;0,关闭;(白屏/黑屏)(0xa4/0xa5)
+    OLED_Write_Cmd(0xA6);// 不使用反向显示 (0xa6/a7) 
+    OLED_Write_Cmd(0xAF);//打开显示
+
+    OLED_Write_Cmd(0xAF); /*display ON*/
+    OLED_Display_Clear();
+    OLED_Set_Pos(0,0);  
 }  
-//画线
-//x1,y1:起点坐标
-//x2,y2:终点坐标  
-void LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2)
-{
-	u16 t; 
-	int xerr=0,yerr=0,delta_x,delta_y,distance; 
-	int incx,incy,uRow,uCol; 
-
-	delta_x=x2-x1; //计算坐标增量 
-	delta_y=y2-y1; 
-	uRow=x1; 
-	uCol=y1; 
-	if(delta_x>0)incx=1; //设置单步方向 
-	else if(delta_x==0)incx=0;//垂直线 
-	else {incx=-1;delta_x=-delta_x;} 
-	if(delta_y>0)incy=1; 
-	else if(delta_y==0)incy=0;//水平线 
-	else{incy=-1;delta_y=-delta_y;} 
-	if( delta_x>delta_y)distance=delta_x; //选取基本增量坐标轴 
-	else distance=delta_y; 
-	for(t=0;t<=distance+1;t++ )//画线输出 
-	{  
-		LCD_DrawPoint(uRow,uCol);//画点 
-		xerr+=delta_x ; 
-		yerr+=delta_y ; 
-		if(xerr>distance) 
-		{ 
-			xerr-=distance; 
-			uRow+=incx; 
-		} 
-		if(yerr>distance) 
-		{ 
-			yerr-=distance; 
-			uCol+=incy; 
-		} 
-	}  
-}    
-//画矩形
-void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2)
-{
-	LCD_DrawLine(x1,y1,x2,y1);
-	LCD_DrawLine(x1,y1,x1,y2);
-	LCD_DrawLine(x1,y2,x2,y2);
-	LCD_DrawLine(x2,y1,x2,y2);
-}
-//在指定位置画一个指定大小的圆
-//(x,y):中心点
-//r    :半径
-void Draw_Circle(u16 x0,u16 y0,u8 r)
-{
-	int a,b;
-	int di;
-	a=0;b=r;	  
-	di=3-(r<<1);             //判断下个点位置的标志
-	while(a<=b)
-	{
-		LCD_DrawPoint(x0-b,y0-a);             //3           
-		LCD_DrawPoint(x0+b,y0-a);             //0           
-		LCD_DrawPoint(x0-a,y0+b);             //1       
-		LCD_DrawPoint(x0-b,y0-a);             //7           
-		LCD_DrawPoint(x0-a,y0-b);             //2             
-		LCD_DrawPoint(x0+b,y0+a);             //4               
-		LCD_DrawPoint(x0+a,y0-b);             //5
-		LCD_DrawPoint(x0+a,y0+b);             //6 
-		LCD_DrawPoint(x0-b,y0+a);             
-		a++;
-		//使用Bresenham算法画圆     
-		if(di<0)di +=4*a+6;	  
-		else
-		{
-			di+=10+4*(a-b);   
-			b--;
-		} 
-		LCD_DrawPoint(x0+a,y0+b);
-	}
-} 
-//在指定位置显示一个字符
-
-//num:要显示的字符:" "--->"~"
-//mode:叠加方式(1)还是非叠加方式(0)
-//在指定位置显示一个字符
-
-//num:要显示的字符:" "--->"~"
-
-//mode:叠加方式(1)还是非叠加方式(0)
-void LCD_ShowChar(u16 x,u16 y,u8 num,u8 mode)
-{
-    u8 temp;
-    u8 pos,t;
-	u16 x0=x;
-	u16 colortemp=POINT_COLOR;      
-    if(x>LCD_W-16||y>LCD_H-16)return;	    
-	//设置窗口		   
-	num=num-' ';//得到偏移后的值
-	Address_set(x,y,x+8-1,y+16-1);      //设置光标位置 
-	if(!mode) //非叠加方式
-	{
-		for(pos=0;pos<16;pos++)
-		{ 
-			temp=asc2_1608[(u16)num*16+pos];		 //调用1608字体
-			for(t=0;t<8;t++)
-		    {                 
-		        if(temp&0x01)POINT_COLOR=colortemp;
-				else POINT_COLOR=BACK_COLOR;
-				LCD_WR_DATA(POINT_COLOR);	
-				temp>>=1; 
-				x++;
-		    }
-			x=x0;
-			y++;
-		}	
-	}else//叠加方式
-	{
-		for(pos=0;pos<16;pos++)
-		{
-		    temp=asc2_1608[(u16)num*16+pos];		 //调用1608字体
-			for(t=0;t<8;t++)
-		    {                 
-		        if(temp&0x01)LCD_DrawPoint(x+t,y+pos);//画一个点     
-		        temp>>=1; 
-		    }
-		}
-	}
-	POINT_COLOR=colortemp;	    	   	 	  
-}   
-//m^n函数
-u32 mypow(u8 m,u8 n)
-{
-	u32 result=1;	 
-	while(n--)result*=m;    
-	return result;
-}			 
-//显示2个数字
-//x,y :起点坐标	 
-//len :数字的位数
-//color:颜色
-//num:数值(0~4294967295);	
-void LCD_ShowNum(u16 x,u16 y,u32 num,u8 len)
-{         	
-	u8 t,temp;
-	u8 enshow=0;
-	num=(u16)num;
-	for(t=0;t<len;t++)
-	{
-		temp=(num/mypow(10,len-t-1))%10;
-		if(enshow==0&&t<(len-1))
-		{
-			if(temp==0)
-			{
-				LCD_ShowChar(x+8*t,y,' ',0);
-				continue;
-			}else enshow=1; 
-		 	 
-		}
-	 	LCD_ShowChar(x+8*t,y,temp+48,0); 
-	}
-} 
-//显示2个数字
-//x,y:起点坐标
-//num:数值(0~99);	 
-void LCD_Show2Num(u16 x,u16 y,u16 num,u8 len)
-{         	
-	u8 t,temp;						   
-	for(t=0;t<len;t++)
-	{
-		temp=(num/mypow(10,len-t-1))%10;
-	 	LCD_ShowChar(x+8*t,y,temp+'0',0); 
-	}
-} 
-//显示字符串
-//x,y:起点坐标  
-//*p:字符串起始地址
-//用16字体
-void LCD_ShowString(u16 x,u16 y,const u8 *p)
-{         
-    while(*p!='\0')
-    {       
-        if(x>LCD_W-16){x=0;y+=16;}
-        if(y>LCD_H-16){y=x=0;LCD_Clear(RED);}
-        LCD_ShowChar(x,y,*p,0);
-        x+=8;
-        p++;
-    }  
-}
 
 
 
-
-void SetColor(u16 bkcolor,u16  forecolor)
-{
-	
-	
-	BACK_COLOR = bkcolor;
-	POINT_COLOR = forecolor;
-	
-	
-	
-}
 
 
 
