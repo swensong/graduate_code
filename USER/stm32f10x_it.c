@@ -176,9 +176,25 @@ void SysTick_Handler(void)
 #include"stm32f10x.h"
 #include"stdarg.h"
 	
-	
+extern __IO uint32_t flag;
+extern  CanRxMsg RxMessage;
 
+void USB_LP_CAN1_RX0_IRQHandler(void)
+{
+   
+  CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
+  /* ???????????ID */ 
+  if((RxMessage.ExtId==0x1314) && (RxMessage.IDE==CAN_ID_EXT)
+     && (RxMessage.DLC==2) && ((RxMessage.Data[1]|RxMessage.Data[0]<<8)==0xABCD))
+  {
+    flag = 0; 					       //????
 
+  }
+  else
+  {
+    flag = 0xff; 					   //????
+  }
+}
 
 
 

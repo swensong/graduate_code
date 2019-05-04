@@ -5,6 +5,7 @@
 ".\delay.o"
 ".\clock.o"
 ".\spi.o"
+".\can.o"
 ".\misc.o"
 ".\stm32f10x_flash.o"
 ".\stm32f10x_gpio.o"

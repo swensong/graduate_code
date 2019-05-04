@@ -19,6 +19,7 @@
 #include "motor.h"
 
 #include "Interrupt.h"
+#include "can.h"
 
 
 #define code  const 
@@ -58,6 +59,10 @@ double calculate();
 char   expr[128];
 int    exprlen = 0;
 
+__IO uint32_t flag = 0xff;		//???????????,????????
+CanTxMsg TxMessage;			    //?????
+CanRxMsg RxMessage; 			//?????
+
 void LCD_printf(char *str);
 
 char string[64];
@@ -94,11 +99,38 @@ int main(void)
 	OLED_Init();
 	
 	OLED_Display_String(0,0,"Init success!");
+	//OLED_Display_Chinese(16, 2, 1);
 	Dgprintf("OLED_Init success!\r\n");
 	
+	CAN_Config();
+	
+	OLED_Display_String(0,2,"can init");
+	/*set sending data*/
+	CAN_SetMsg();	
+			
+	/*send data*/		
+	CAN_Transmit(CAN1, &TxMessage);	
+	
+	OLED_Display_String(0,0,"                ");
+	OLED_Display_String(0,2,"                ");
+	OLED_Display_String(0,4,"                ");
+	OLED_Display_String(0,6,"                ");
+	
+	OLED_Display_String(0, 0,"can init");
+	OLED_Display_String(0,0,"can send");
+	OLED_Display_Num(0, 2, TxMessage.ExtId, 8,16);
+	OLED_Display_Num(0, 6, TxMessage.Data[0], 8,16);
+	OLED_Display_Num(64, 6, TxMessage.Data[1], 8,16);
+
+
 			
 	while (1)
 	{
+//				OLED_Display_String(0,0,"can reserve");
+//				OLED_Display_Num(0, 2, RxMessage.ExtId, 8,16);
+//				OLED_Display_Num(0, 6, RxMessage.Data[0], 8,16);
+//				OLED_Display_Num(64, 6, RxMessage.Data[1], 8,16);		
+		CAN_Transmit(CAN1, &TxMessage);			
 	}
 
 }

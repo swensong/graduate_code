@@ -38,3 +38,4 @@
 .\main.o: ..\USER\TiMbase.h
 .\main.o: ..\USER\motor.h
 .\main.o: ..\USER\Interrupt.h
+.\main.o: ..\USER\can.h
